@@ -2,12 +2,12 @@ from datetime import date
 
 from sqlmodel import Session, select  # type: ignore
 
-from ....model.configs.base import engine
-from ....model.entities.bancos import Bancos
-from ....model.entities.contas import Conta
-from ....model.entities.historico import Historico
-from ....model.entities.status import Status
-from ....model.entities.tipos_historico import Tipos
+from ...model.configs.base import engine
+from ...model.entities.bancos import Bancos
+from ...model.entities.contas import Conta
+from ...model.entities.historico import Historico
+from ...model.entities.status import Status
+from ...model.entities.tipos_historico import Tipos
 
 
 def create_account(conta: Conta):
@@ -106,10 +106,25 @@ def get_all_balances():
   return total_balance
 
 
-conta = Conta(
-  id=1,
-  valor=100,
-  banco=Bancos.NUBANK
-)
+def get_historic_by_date(initial_date: date, final_date: date):
+  with Session(engine) as session:
+    statement = select(Historico).where(
+      Historico.data >= initial_date,
+      Historico.data <= final_date
+    )
+    result = session.exec(statement).all()
 
-create_account(conta)
+    return result
+
+def create_graph_by_acount():
+  with Session(engine) as session:
+    statement = select(Conta).where(Conta.status == Status.ATIVO)
+    contas = session.exec(statement).all()
+
+    bancos = [conta.banco.value for conta in contas] # o mesmo que for conta in contas
+    total = [conta.valor for conta in contas]
+    import matplotlib.pyplot as plt  # type: ignore -> importar lib
+    plt.bar(bancos, total) # criar o grafico
+    plt.show() # exibir
+
+    return contas
