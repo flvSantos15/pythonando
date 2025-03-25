@@ -6,3 +6,4 @@ class Bancos(Enum):
     ITAU = "Itau"
     SANTADER = "Santader"
     INTER = "Inter"
+    C6 = "C6"

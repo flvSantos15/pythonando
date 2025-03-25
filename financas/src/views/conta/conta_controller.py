@@ -1,9 +1,9 @@
 from datetime import date
 
+import matplotlib.pyplot as plt  # type: ignore
 from sqlmodel import Session, select  # type: ignore
 
 from ...model.configs.base import engine
-from ...model.entities.bancos import Bancos
 from ...model.entities.contas import Conta
 from ...model.entities.historico import Historico
 from ...model.entities.status import Status
@@ -21,6 +21,7 @@ def create_account(conta: Conta):
 
     session.add(conta) # Adiciona no banco
     session.commit() # Salva no banco
+    print("Conta criada com sucesso")
     return conta
 
 def list_accounts():
@@ -31,8 +32,12 @@ def list_accounts():
 
 def deactivate_account(id: int):
   with Session(engine) as session:
-    statement = select(Conta).where(Conta.id == id)
+    statement = select(Conta).where(Conta.status == Status.ATIVO, Conta.id == id)
     conta = session.exec(statement).first()
+
+    if conta.status == Status.INATIVO:
+      print("A conta já está inativa")
+      return
 
     if not conta:
       print("Não existe uma conta com esse id cadastrado")
@@ -105,7 +110,6 @@ def get_all_balances():
 
   return total_balance
 
-
 def get_historic_by_date(initial_date: date, final_date: date):
   with Session(engine) as session:
     statement = select(Historico).where(
@@ -123,7 +127,10 @@ def create_graph_by_acount():
 
     bancos = [conta.banco.value for conta in contas] # o mesmo que for conta in contas
     total = [conta.valor for conta in contas]
-    import matplotlib.pyplot as plt  # type: ignore -> importar lib
+
+    print(bancos)
+    print(total)
+    
     plt.bar(bancos, total) # criar o grafico
     plt.show() # exibir
 
