@@ -49,7 +49,7 @@ def deactivate_account(id: int):
     conta.status = Status.INATIVO
     session.commit()
     return
-  
+
 def transfer_balance(id_origem: int, id_destino: int, valor: float):
   with Session(engine) as session:
     statement = select(Conta).where(Conta.id == id_origem)
@@ -135,3 +135,4 @@ def create_graph_by_acount():
     plt.show() # exibir
 
     return contas
+
