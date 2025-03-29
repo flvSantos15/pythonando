@@ -4,7 +4,7 @@ from django.shortcuts import redirect, render  # type: ignore
 
 from .models import Consultas, Pacientes, Tarefas
 
-# Parei em 3:06:16
+# Parei em 3:16:30
 
 def pacientes(request):
   if request.method == "GET":
@@ -33,13 +33,13 @@ def pacientes(request):
 
     messages.add_message(request, constants.SUCCESS, 'Paciente adicionado com sucesso')
     return redirect('pacientes')
-  
 
 def paciente_view(request, id):
   paciente = Pacientes.objects.get(id=id)
   if request.method == "GET":
     tarefas = Tarefas.objects.all()
-    return render(request, 'paciente.html', {'paciente': paciente, 'tarefas': tarefas})
+    consultas = Consultas.objects.filter(paciente=paciente).order_by('-data')
+    return render(request, 'paciente.html', {'paciente': paciente, 'tarefas': tarefas, 'consultas': consultas})
   elif request.method == "POST":
     humor = request.POST.get('humor')
     registro_geral = request.POST.get('registro_geral')
@@ -69,3 +69,16 @@ def atualizar_paciente(request, id):
   paciente.pagamento_em_dia = status
   paciente.save()
   return redirect(f'/pacientes/{id}')
+
+def excluir_consulta(request, id):
+  consulta = Consultas.objects.get(id=id)
+  consulta.delete()
+  return redirect(f'/pacientes/{consulta.paciente.id}')
+
+def consulta_publica(request, id):
+    consulta = Consultas.objects.get(id=id)
+    if not consulta.paciente.pagamento_em_dia:
+        raise Http404()
+
+    return render(request, 'consulta_publica.html', {'consulta': consulta})
+

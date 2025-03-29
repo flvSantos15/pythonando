@@ -208,28 +208,26 @@
 
         <div class="mx-auto">
           <ul role="list" class="divide-y divide-white/5">
+            {% for consulta in consultas %}
             <li class="relative flex items-center space-x-4 py-4">
               <div class="min-w-0 flex-auto">
                 <div class="flex items-center gap-x-3">
-                  <div
-                    class="flex-none rounded-full p-1 bg-green-400/10 text-green-400"
-                  >
+                  <div class="flex-none rounded-full p-1 {% if consulta.humor >= 3 %} bg-green-400/10 text-green-400 {% else  %} bg-red-400/10 text-red-400 {% end if %}">
                     <div class="size-2 rounded-full bg-current"></div>
                   </div>
+                  
                   <h2 class="min-w-0 text-sm/6 font-semibold text-slate-800">
                     <a href="#" class="flex gap-x-2">
-                      <span class="truncate">30/02/20024</span>
+                      <span class="truncate">{{ consulta.data }}</span>
                     </a>
                   </h2>
                 </div>
-                <div
-                  class="mt-3 flex items-center gap-x-2.5 text-xs/5 text-gray-400"
-                >
+                <div class="mt-3 flex items-center gap-x-2.5 text-xs/5 text-gray-400">
                   <p class="truncate">Link aqui</p>
                   <p class="whitespace-nowrap">0 - 0</p>
                 </div>
               </div>
-              <a href="" class="flex gap-x-2">
+              <a href="{% url 'excluir_consulta' consulta.id %}" class="flex gap-x-2">
                 <div
                   class="flex-none rounded-full bg-red-400/10 px-2 py-1 text-xs font-medium text-red-400 ring-1 ring-inset ring-red-400/30"
                 >
@@ -250,6 +248,7 @@
                 </svg>
               </a>
             </li>
+            {% endfor %}
           </ul>
         </div>
       </div>
