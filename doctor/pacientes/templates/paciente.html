@@ -70,12 +70,14 @@
         </p>
         <span
           class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10"
-          >{{total_consultas}} sessões realizadas</span
         >
+          {{total_consultas}} sessões realizadas
+        </span>
         <span
           class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-700/10"
-          >2 Faltas</span
         >
+          2 Faltas
+        </span>
 
         <form action="{% url 'atualizar_paciente' paciente.id %}" method="POST">
           {% csrf_token %}
@@ -179,7 +181,9 @@
                 multiple
                 class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               >
-                <option value="">RPD</option>
+                {% for tarefa in tarefas %}
+                  <option value="{{ tarefa.id }}">{{ tarefa.tarefa }}</option>
+                {% endfor %}
               </select>
             </div>
             <button

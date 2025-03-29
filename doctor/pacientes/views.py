@@ -2,7 +2,7 @@ from django.contrib import messages  # type: ignore
 from django.contrib.messages import constants  # type: ignore
 from django.shortcuts import redirect, render  # type: ignore
 
-from .models import Pacientes
+from .models import Consultas, Pacientes, Tarefas
 
 
 def pacientes(request):
@@ -37,7 +37,8 @@ def pacientes(request):
 def paciente_view(request, id):
   paciente = Pacientes.objects.get(id=id)
   if request.method == "GET":
-    return render(request, 'paciente.html', {'paciente': paciente})
+    tarefas = Tarefas.objects.all()
+    return render(request, 'paciente.html', {'paciente': paciente, 'tarefas': tarefas})
 
 def atualizar_paciente(request, id):
   paciente = Pacientes.objects.get(id=id)
