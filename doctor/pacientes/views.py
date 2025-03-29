@@ -4,6 +4,7 @@ from django.shortcuts import redirect, render  # type: ignore
 
 from .models import Consultas, Pacientes, Tarefas
 
+# Parei em 3:06:16
 
 def pacientes(request):
   if request.method == "GET":
@@ -39,6 +40,27 @@ def paciente_view(request, id):
   if request.method == "GET":
     tarefas = Tarefas.objects.all()
     return render(request, 'paciente.html', {'paciente': paciente, 'tarefas': tarefas})
+  elif request.method == "POST":
+    humor = request.POST.get('humor')
+    registro_geral = request.POST.get('registro_geral')
+    video = request.FILES.get('video')
+    tarefas = request.POST.getlist('tarefas')
+
+    consulta = Consultas(
+      humor=int(humor),
+      registro_geral=registro_geral,
+      video=video,
+      paciente=paciente
+    )
+    consulta.save()
+    for tarefa in tarefas:
+      tarefa = Tarefas.objects.get(id=tarefa)
+      paciente.tarefas.add(tarefa)
+
+    consulta.save()
+
+    messages.add_message(request, constants.SUCCESS, 'Consulta adicionada com sucesso')
+    return redirect('/pacientes/{id}')
 
 def atualizar_paciente(request, id):
   paciente = Pacientes.objects.get(id=id)
