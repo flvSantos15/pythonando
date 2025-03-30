@@ -1,10 +1,10 @@
 from django.contrib import messages  # type: ignore
 from django.contrib.messages import constants  # type: ignore
+from django.http import Http404
 from django.shortcuts import redirect, render  # type: ignore
 
-from .models import Consultas, Pacientes, Tarefas
+from .models import Consultas, Pacientes, Tarefas, Visualizacoes
 
-# Parei em 3:16:30
 
 def pacientes(request):
   if request.method == "GET":
@@ -39,7 +39,10 @@ def paciente_view(request, id):
   if request.method == "GET":
     tarefas = Tarefas.objects.all()
     consultas = Consultas.objects.filter(paciente=paciente).order_by('-data')
-    return render(request, 'paciente.html', {'paciente': paciente, 'tarefas': tarefas, 'consultas': consultas})
+    
+    tuple_grafico = ([str(i.data) for i in consultas], [str(i.humor) for i in consultas])
+
+    return render(request, 'paciente.html', {'paciente': paciente, 'tarefas': tarefas, 'consultas': consultas, 'tuple_grafico': tuple_grafico})
   elif request.method == "POST":
     humor = request.POST.get('humor')
     registro_geral = request.POST.get('registro_geral')
@@ -68,7 +71,7 @@ def atualizar_paciente(request, id):
   status = True if pagamento_em_dia == 'ativo' else False
   paciente.pagamento_em_dia = status
   paciente.save()
-  return redirect(f'/pacientes/{id}')
+  return redirect('/pacientes/{id}')
 
 def excluir_consulta(request, id):
   consulta = Consultas.objects.get(id=id)
@@ -79,6 +82,17 @@ def consulta_publica(request, id):
     consulta = Consultas.objects.get(id=id)
     if not consulta.paciente.pagamento_em_dia:
         raise Http404()
+    
+    view = Visualizacoes(
+      consulta=consulta,
+      ip=request.META['REMOTE_ADDR']
+    )
+    view.save()
 
     return render(request, 'consulta_publica.html', {'consulta': consulta})
 
+def views(self):
+    views = Visualizacoes.objects.filter(consulta=self)
+    totais = views.count()
+    unicas = views.values('ip').distinct().count()
+    return f'{totais} - {unicas}'
