@@ -1,6 +1,6 @@
 from django.contrib import messages  # type: ignore
 from django.contrib.messages import constants  # type: ignore
-from django.http import Http404
+from django.http import Http404  # type: ignore
 from django.shortcuts import redirect, render  # type: ignore
 
 from .models import Consultas, Pacientes, Tarefas, Visualizacoes
