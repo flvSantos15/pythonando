@@ -56,24 +56,38 @@ def progresso_aluno(request, email_aluno: str):
         "aulas_necessarias_para_proxima_faixa": aulas_faltantes
     }
 
-# @treino_router.put("/alunos/{aluno_id}", response=AlunosSchema)
-# def update_aluno(request, aluno_id: int, aluno_data: AlunosSchema):
-#     aluno = get_object_or_404(Alunos, id=aluno_id)
-    
-#     idade = date.today() - aluno.data_nascimento
-
-#     if int(idade.days/365) < 18 and aluno_data.dict()['faixa'] in ('A', 'R', 'M', 'P'):
-#         raise HttpError(400, "O aluno é menor de idade e não pode ser graduado para essa faixa.")
-
-#     #exclude_unset=True
-#     for attr, value in aluno_data.dict().items():
-#         if value:
-#             setattr(aluno, attr, value)
-    
-#     aluno.save()
-#     return aluno
-
 @treino_router.post('/aulas_realizadas/', response={200: str})
 def aula_realizada(request, aula_realizada: AulasRealizadasSchema):
-  
+  qtd = aula_realizada.dict()['qtd']
+  email_aluno = aula_realizada.dict()['email_aluno']
+
+  if qtd <= 0:
+    raise HttpError(400, "A quantidade de aulas realizadas deve ser maior que zero.")
+
+  aluno = Alunos.objects.get(email=email_aluno)
+
+  aulas = [
+     AulasConcluidas(aluno=aluno, faixa_atual=aluno.faixa)
+     for _ in range(qtd)
+  ]
+  AulasConcluidas.objects.bulk_create(aulas)
+
   return "Aula realizada com sucesso"
+
+@treino_router.put("/alunos/{aluno_id}", response=AlunosSchema)
+def update_aluno(request, aluno_id: int, aluno_data: AlunosSchema):
+    # aluno = get_object_or_404(Alunos, id=aluno_id)
+    aluno = Alunos.objects.get(id=aluno_id)
+    
+    idade = date.today() - aluno.data_nascimento
+
+    if int(idade.days/365) < 18 and aluno_data.dict()['faixa'] in ('A', 'R', 'M', 'P'):
+        raise HttpError(400, "O aluno é menor de idade e não pode ser graduado para essa faixa.")
+
+    #exclude_unset=True
+    for attr, value in aluno_data.dict().items():
+        if value:
+            setattr(aluno, attr, value)
+    
+    aluno.save()
+    return aluno
