@@ -4,7 +4,7 @@ import requests
 # URL base da API – ajuste conforme necessário
 API_BASE_URL = "http://localhost:8000/api"
 
-# Parei em 43:22
+# Parei em 1:01:00
 
 def main(page: ft.Page):
     page.title = "Exemplo"
@@ -15,7 +15,7 @@ def main(page: ft.Page):
     faixa_field = ft.TextField(label="Faixa")
     data_nascimento_field = ft.TextField(label="Data de Nascimento (YYYY-MM-DD)")
 
-    def criar_aluno():
+    def criar_aluno(e):
         payload = {
             "nome": nome_field.value,
             "email": email_field.value,
@@ -81,11 +81,33 @@ def main(page: ft.Page):
     list_button = ft.ElevatedButton("Listar Alunos", on_click=list_students)
     list_students_tab = ft.Column([ list_button, list_result, students_table ], scroll=True)
 
+    student_email_field = ft.TextField(label="Email do Aluno")
+    qtd_field = ft.TextField(label="Quantidade de aulas", value="1")
+    aula_result = ft.Text()
+
+    def marcar_aula_click(e):
+        payload = {
+            "email_aluno": student_email_field.value,
+            "qtd": int(qtd_field.value),
+        }
+
+        response = requests.post(f"{API_BASE_URL}/aulas_realizadas/", json=payload)
+        if response.status_code == 200:
+            aula_result.value = f"Aula realizada com sucesso"
+        else:
+            aula_result.value = f"Erro: {response.text}"
+
+        page.update()
+
+    aula_button = ft.ElevatedButton("Realizar Aula", on_click=marcar_aula_click)
+    aula_tab = ft.Column([ student_email_field, qtd_field, aula_button, aula_result], scroll=True)
+
     tabs = ft.Tabs(
         selected_index=0,
         tabs=[
           ft.Tab(text="Criar Aluno", content=criar_aluno_tab),
           ft.Tab(text="Listar Alunos", content=list_students_tab),
+          ft.Tab(text="Cadastrar Aula", content=aula_tab),
         ]
     )
 
