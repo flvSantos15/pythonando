@@ -15,7 +15,7 @@ def main(page: ft.Page):
     faixa_field = ft.TextField(label="Faixa")
     data_nascimento_field = ft.TextField(label="Data de Nascimento (YYYY-MM-DD)")
 
-    def criar_aluno(e):
+    def criar_aluno():
         payload = {
             "nome": nome_field.value,
             "email": email_field.value,
@@ -47,10 +47,45 @@ def main(page: ft.Page):
         scroll=True
     )
 
+    students_table = ft.DataTable(
+        columns=[
+            ft.DataColumn("Nome"),
+            ft.DataColumn("Email"),
+            ft.DataColumn("Faixa"),
+            ft.DataColumn("Data de Nascimento"),
+        ],
+        rows=[],
+    )
+
+    def list_students(e):
+        response = requests.get(f"{API_BASE_URL}/alunos/")
+        if response.status_code == 200:
+            alunos = response.json()
+            students_table.rows.clear()
+            
+            students_table.rows = [
+                ft.DataRow(cells=[
+                    ft.DataCell(aluno["nome"]),
+                    ft.DataCell(aluno["email"]),
+                    ft.DataCell(aluno["faixa"]),
+                    ft.DataCell(aluno["data_nascimento"]),
+                ]) for aluno in alunos
+            ]
+            list_result.value = f"{len(alunos)} alunos encontrados"
+        else:
+            list_result.value = f"Erro: {response.text}"
+
+        page.update()
+    
+    list_result = ft.Text()
+    list_button = ft.ElevatedButton("Listar Alunos", on_click=list_students)
+    list_students_tab = ft.Column([ list_button, list_result, students_table ], scroll=True)
+
     tabs = ft.Tabs(
         selected_index=0,
         tabs=[
           ft.Tab(text="Criar Aluno", content=criar_aluno_tab),
+          ft.Tab(text="Listar Alunos", content=list_students_tab),
         ]
     )
 
